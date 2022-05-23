@@ -1,3 +1,6 @@
+/*Копирование папки*/
+//node 04-copy-directory
+
 const path = require('path');
 const {readdir, mkdir, copyFile, rm} = require('fs/promises');
 

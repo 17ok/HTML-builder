@@ -1,3 +1,6 @@
+/*Вывод информации о файлаx хранящихся в папке*/
+//node 03-files-in-folder
+
 const process = require('process');
 const path = require('path');
 const {readdir, stat} = require('fs');

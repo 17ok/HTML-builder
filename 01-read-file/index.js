@@ -1,3 +1,6 @@
+/*Чтение файла с выводом содержимого в консоль*/
+//node 01-read-file
+
 const fs = require('fs');
 const path = require('path');
 const filePath = path.resolve(__dirname, 'text.txt');

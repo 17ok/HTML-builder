@@ -1,3 +1,6 @@
+/*Запись консольного ввода в файл*/
+//node 02-write-file
+
 const process = require('process');
 const fs = require('fs');
 const path = require('path');

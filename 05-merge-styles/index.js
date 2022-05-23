@@ -1,3 +1,6 @@
+/*Сборка css бандла*/
+//node 05-merge-styles
+
 const path = require('path');
 const {readdir} = require('fs/promises');
 const fs = require('fs');

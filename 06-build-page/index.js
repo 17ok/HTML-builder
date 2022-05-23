@@ -1,5 +1,8 @@
+/*Сборка HTML страницы из компонентов и стилей*/
+// node 06-build-page
+
 const path = require('path');
-const {readdir, mkdir, rm, copyFile } = require('fs/promises');
+const {readdir, mkdir, rm, copyFile, readFile} = require('fs/promises');
 const fs = require('fs');
 
 
@@ -12,9 +15,11 @@ async function buildPage(pathTo) {
     await rm(pathTo, {recursive: true, force: true});
     await mkdir(pathTo, {recursive: true});
 
-
-   
     //Заменяет шаблонные теги в файле template.html
+    const htmlTo = path.join(__dirname, 'project-dist', 'index.html');
+    const htmlFrom = path.join(__dirname, 'components');
+    await copyHtml(htmlTo, htmlFrom)
+
     //Собирает в единый файл стили из папки styles и помещает их в файл project-dist/style.css.
     const cssTo = path.join(__dirname, 'project-dist', 'style.css');
     const cssFrom = path.join(__dirname, 'styles');
@@ -23,14 +28,36 @@ async function buildPage(pathTo) {
     //Копирует папку assets в project-dist/assets
     const assetsTo = path.join(__dirname, 'project-dist', 'assets');
     const assetsFrom = path.join(__dirname, 'assets');
-    try {
-        await copyFolder(assetsTo, assetsFrom);
-    }
+    await copyFolder(assetsTo, assetsFrom);
+};
+
+//Заменяет шаблонные теги в файле template.html
+async function copyHtml(pathTo, pathFrom) {
+    try{
+
+    const templatePath =  path.join(__dirname, 'template.html');
+    const writeStream = fs.createWriteStream(pathTo);
+    const readStream = fs.createReadStream(templatePath);
+    const fileNames = await readdir(pathFrom, {withFileTypes: true});
+    
+    readStream.on('data', async(info) => {
+            async function getData(){
+                let data = info.toString();    
+            for (let file of fileNames){
+                const filePath = path.resolve(pathFrom, file.name);
+                const component = await readFile(filePath);
+                const tag = path.parse(filePath).name;
+                data = data.replace(`{{${tag}}}`, `${component}`);
+            }
+            return data;
+           }
+            let newData = await getData();
+             writeStream.write(newData);
+            });
+            }
     catch(error){
         throw error;
-     }
-    
-
+    }
 };
 
 //Собирает в единый файл стили из папки styles и помещает их в файл project-dist/style.css.
@@ -47,7 +74,6 @@ async function copyStyles(pathTo, pathFrom) {
        
       if (file.isFile() && path.parse(filePath).ext === '.css') {
             const readStream = fs.createReadStream(filePath);
-            //readStream.pipe(writeStream, {end: false});
             readStream.on('data', info => writeStream.write(info + '\n'));
         }
     })
@@ -73,8 +99,6 @@ async function copyFolder(pathTo, pathFrom) {
         } catch (error) {
          throw error;   
         }
-    
-        //await rm(pathTo, {recursive: true, force: true});
         await mkdir(pathTo, {recursive: true}); 
     }
 
